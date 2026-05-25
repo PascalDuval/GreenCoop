@@ -1,0 +1,81 @@
+
+services:
+  mongo1:
+    image: mongo:6
+    container_name: mongo1
+    ports:
+      - "27027:27017"
+    volumes:
+      - mongo1_data:/data/db
+    command: ["--replSet", "rsGreenCoop"]
+    networks:
+      - mongo-cluster
+
+  mongo2:
+    image: mongo:6
+    container_name: mongo2
+    ports:
+      - "27028:27017"
+    volumes:
+      - mongo2_data:/data/db
+    command: ["--replSet", "rsGreenCoop"]
+    networks:
+      - mongo-cluster
+
+  mongo3:
+    image: mongo:6
+    container_name: mongo3
+    ports:
+      - "27029:27017"
+    volumes:
+      - mongo3_data:/data/db
+    command: ["--replSet", "rsGreenCoop"]
+    networks:
+      - mongo-cluster
+
+  mongo-setup:
+    image: mongo:6
+    container_name: mongo-setup
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+    volumes:
+      - ./scripts-replica:/scripts
+    entrypoint: ["/bin/sh", "/scripts/mongo-setup.sh"]
+    networks:
+      - mongo-cluster
+    restart: "no"
+
+  data_migration:
+    build: .
+    container_name: data_migration
+    depends_on:
+      mongo-setup:
+        condition: service_completed_successfully
+    volumes:
+      - ./data:/home/jovyan/app/data
+      - ./migration:/home/jovyan/app/migration
+      - ./scripts-replica:/home/jovyan/app/scripts-replica
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENABLE_REPLICA_TESTS=${ENABLE_REPLICA_TESTS:-true}
+      - MONGO_URI=${MONGO_URI:-mongodb://mongo1:27017}
+      - MONGO_PRIMARY_URI=${MONGO_PRIMARY_URI:-mongodb://mongo1:27017/?replicaSet=rsGreenCoop}
+      - MONGO_PRIMARY_ADMIN_URI=${MONGO_PRIMARY_ADMIN_URI:-mongodb://admin:admin123@mongo1:27017/admin?replicaSet=rsGreenCoop}
+      - MONGO_REPLICA_URI=${MONGO_REPLICA_URI:-mongodb://analyste:readonly123@mongo1:27017,mongo2:27017,mongo3:27017/GreenCoop?replicaSet=rsGreenCoop}
+      - MONGO_CLONE_SECONDARY_URI=${MONGO_CLONE_SECONDARY_URI:-mongodb://analyste:readonly123@mongo3:27017/GreenCoop?directConnection=true}
+      - DB_NAME=${DB_NAME:-GreenCoop}
+      - COLLECTION_NAME=${COLLECTION_NAME:-ObsProEtAmateur}
+      - BACKUP_FILE=${BACKUP_FILE:-/home/jovyan/app/data/backup_ObsProEtAmateur.jsonl}
+      - VISUAL_FILE=${VISUAL_FILE:-/home/jovyan/app/data/visualisation_temp.png}
+    networks:
+      - mongo-cluster
+
+volumes:
+  mongo1_data:
+  mongo2_data:
+  mongo3_data:
+
+networks:
+  mongo-cluster:

@@ -1,0 +1,22 @@
+Une présentation au format PowerPoint (ou autre logiciel similaire) avec :
+
+
+Une presentation de la société et de la missiobn et de la scoiété
+En tant que Data Engineer, je dois fournir quotidiennement des données météorologiques de qualité aux Data Scientists pour leurs modèles de prévision. La prévision de demande est essentielle pour GreenCoop. L'entreprise souhaite :
+- équilibrer le réseau : GreenCoop doit s’assurer que la production et la consommation d’électricité sont équilibrées en temps réel pour éviter des pénalités financières.
+- optimiser la production : Les sources d’énergie renouvelable, comme le solaire et l’éolien, sont intermittentes. -  En prévoyant la demande, GreenCoop peut planifier plus efficacement l’utilisation de ses ressources et maximiser l’efficacité de la production.
+- gérer ses coûts : Une prévision précise de la demande permet de réduire les coûts liés à l’achat d’électricité sur le marché de gros, en évitant les achats d’urgence à des prix élevés.
+Pour gagner en précision dans leurs prévisions, les Data Scientists de GreenCoop ont lancé un nouveau projet qui s’appelle Forecast 2.0. L’objectif de celui-ci est d’intégrer de nouvelles sources de données dans leurs algorithmes comme celles issues de stations météorologiques semi-professionnelles. 
+
+ 
+
+Puis dans un second un rendu particulièremenrt pédagoque  dit consistera en : 
+le schéma de la base de données (comment la requeter pour obtenir les données;
+le logigramme du processus suivi pour collecter, transformer, stocker et tester les données ;
+le schéma de l’architecture de la base de données ;
+une capture d’écran pour montrer l’installation mise en place pour Airbyte ;
+La stack technique utilisée (les outils/services web utilisés
+un reporting sur temps d'accessibilité aux données et la qualité des données  (taux d’erreurs);
+ 
+
+faire cela façon story telling

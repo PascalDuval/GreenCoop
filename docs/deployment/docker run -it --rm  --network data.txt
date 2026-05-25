@@ -1,0 +1,1 @@
+docker run -it --rm \ --network dataprojet8_default \ -v "$(pwd)/data:/home/jovyan/app/data" \ dataprojet8-data_migration bash

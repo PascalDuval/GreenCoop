@@ -1,0 +1,21 @@
+services:
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  data_migration:
+    build: .
+    container_name: data_migration
+    depends_on:
+      - mongodb
+    volumes:
+      - ./data:/home/jovyan/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+
+volumes:
+  mongodb_data:

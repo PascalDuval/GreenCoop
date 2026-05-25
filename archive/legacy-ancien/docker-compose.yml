@@ -1,0 +1,55 @@
+services:
+  mongo1:
+    image: mongo:6
+    container_name: mongo1
+    ports:
+      - "27027:27017"  # 🔧 port hôte:port conteneur
+    volumes:
+      - mongo1_data:/data/db
+      - ./scripts-replica:/scripts-replica
+    command: ["--replSet", "rsGreenCoop"]
+    networks:
+      - mongo-cluster
+
+  mongo2:
+    image: mongo:6
+    container_name: mongo2
+    ports:
+      - "27028:27017"
+    volumes:
+      - mongo2_data:/data/db
+    command: ["--replSet", "rsGreenCoop"]
+    networks:
+      - mongo-cluster
+
+  mongo3:
+    image: mongo:6
+    container_name: mongo3
+    ports:
+      - "27029:27017"
+    volumes:
+      - mongo3_data:/data/db
+    command: ["--replSet", "rsGreenCoop"]
+    networks:
+      - mongo-cluster
+
+  data_migration:
+    build: .
+    container_name: data_migration
+    depends_on:
+      - mongo1
+    volumes:
+      - ./data:/home/jovyan/app/data
+      - ./migration:/home/jovyan/app/migration
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - mongo-cluster
+
+volumes:
+  mongo1_data:
+  mongo2_data:
+  mongo3_data:
+
+networks:
+  mongo-cluster:

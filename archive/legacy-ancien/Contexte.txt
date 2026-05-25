@@ -1,0 +1,121 @@
+# Contexte - Projet dataprojet8
+
+Ce dossier contient un pipeline de transformation de donnees meteo (JSON + Excel) vers une base MongoDB Time Series, des notebooks de validation/qualite, et des scripts PowerShell pour un Replica Set MongoDB local (GreenCoop).
+
+## Sommaire
+
+- 1. Langage et environnement
+- 2. Structure du projet (extrait)
+- 3. Migration de donnees
+- 4. Volumes (donnees persistantes)
+- 5. Tests / demonstration de la migration
+- Fichiers cles a consulter
+
+---
+
+## 1. Langage et environnement
+
+- Langage principal : Python (notebooks .ipynb + module .py)
+- Scripts d'infra : PowerShell (.ps1) + Mongo Shell (.js)
+- Aucun fichier de dependances detecte : pas de requirements.txt, Pipfile, poetry.lock ni environment.yml dans le dossier racine.
+  - Dependances vues dans les notebooks : pandas, pymongo, json, pathlib, re.
+
+Format du script de migration :
+- La migration est principalement dans des notebooks Jupyter :
+  - scriptsEtTests.ipynb (pipeline + import MongoDB)
+  - coherencedata.ipynb (fusion, nettoyage, validation, export)
+- Il existe aussi un module Python ts_crud.py pour interagir avec MongoDB.
+
+Execution d'un notebook :
+- Execution standard :
+  jupyter nbconvert --execute --to notebook scriptsEtTests.ipynb
+- Pas d'indication de besoin specifique pour papermill dans les fichiers.
+
+---
+
+## 2. Structure du projet (extrait)
+
+/dataprojet8
+  data/
+    Data_Source1_011024-071024.json
+    WeatherUndergroundLaMadeleineFR.xlsx
+    WeatherUndergroundIchtegemBE.xlsx
+    observations_flat.json
+    observations_def.json
+    observations_timeseries.jsonl
+  scripts/
+    start-replica-GreenCoop.ps1
+    stop-replica-GreenCoop.ps1
+    init-replica-GreenCoop.js
+    test-replica-GreenCoop.ps1
+    Readme_LancerReplica.txt
+    Readme_test-replica.txt
+  scriptsEtTests.ipynb
+  coherencedata.ipynb
+  fonction_gen_CRUD.ipynb
+  ts_crud.py
+  Readme.txt
+
+---
+
+## 3. Migration de donnees
+
+Sources et transformations (d'apres scriptsEtTests.ipynb et coherencedata.ipynb) :
+- Fichiers JSON + Excel :
+  - JSON : data/Data_Source1_011024-071024.json (InfoClimat)
+  - Excel : data/WeatherUndergroundLaMadeleineFR.xlsx, data/WeatherUndergroundIchtegemBE.xlsx
+- Nettoyage / normalisation :
+  - Conversions d'unites (F vers C, inHg vers hPa, mph vers km/h, in vers mm)
+  - Fusion des metadonnees stations
+  - Construction de dh_utc (date ISO)
+- Export :
+  - data/observations_flat.json (JSON plat)
+  - data/observations_def.json (donnees propres)
+  - data/observations_timeseries.jsonl (format JSONL time series)
+
+Base de donnees :
+- MongoDB locale (mongodb://localhost:27017)
+- Base : GreenCoop
+- Collection time series : ObsProEtAmateur (timeField dh_utc, metaField station_id)
+
+API externe :
+- Aucune mention d'appel d'API externe dans les notebooks ou scripts.
+
+Destination des donnees :
+- Fichiers nettoyes dans data/
+- Import MongoDB via pymongo (voir scriptsEtTests.ipynb + ts_crud.py)
+
+---
+
+## 4. Volumes (donnees persistantes)
+
+- Donnees generees : dossier data/ (JSON/JSONL de sortie)
+- MongoDB local : stocke sous C:\Users\karap\mongodb\ par les scripts de Replica Set (scripts/start-replica-GreenCoop.ps1)
+- Fichier de sauvegarde Mongo : data/backup_ObsProEtAmateur.jsonl (vu dans fonction_gen_CRUD.ipynb)
+
+---
+
+## 5. Tests / demonstration de la migration
+
+Demonstration dans notebooks :
+- Affichages de comptage (ex: "4950 documents charges/inseres")
+- Insertion MongoDB confirmee dans scriptsEtTests.ipynb
+- Verification d'integrite post-migration dans coherencedata.ipynb
+
+Tests Replica Set :
+- Scripts PowerShell pour simuler le fonctionnement :
+  - scripts/start-replica-GreenCoop.ps1
+  - scripts/init-replica-GreenCoop.js
+  - scripts/test-replica-GreenCoop.ps1 (contient un guide de tests)
+  - scripts/stop-replica-GreenCoop.ps1
+- Verifications recommandees via mongosh ou MongoDB Compass.
+
+---
+
+## Fichiers cles a consulter
+
+- scriptsEtTests.ipynb : pipeline de transformation + import MongoDB
+- coherencedata.ipynb : fusion + controle qualite + nettoyage + export JSON/JSONL
+- ts_crud.py : utilitaire CRUD MongoDB (Time Series)
+- scripts/Readme_LancerReplica.txt : guide de lancement Replica Set
+- scripts/Readme_test-replica.txt : guide de tests Replica Set
