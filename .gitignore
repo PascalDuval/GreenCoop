@@ -79,6 +79,8 @@ mongo_data/
 # Legacy/archive noise
 # -----------------------------
 ancien/
+docs/notes/
+docs/presentation/
 archive/legacy-ancien/__pycache__/
 archive/legacy-ancien/.ipynb_checkpoints/
 archive/legacy-ancien/**/.ipynb_checkpoints/
